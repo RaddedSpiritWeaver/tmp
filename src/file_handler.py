@@ -1,12 +1,6 @@
 import random
 
 
-x_list = []
-y_list = []
-train_x_list = []
-train_y_list = []
-
-
 def read(path):
     with open(path) as file:
         data = []
@@ -15,7 +9,6 @@ def read(path):
             tokens = line.split(',')
             data.append([float(tokens[0]), float(tokens[1])])
             labels.append(int(tokens[2]))
-        shuffle_tmp = list(zip(data, labels))
-        random.shuffle(shuffle_tmp)
-        data, labels = zip(*shuffle_tmp)
+        random.shuffle(labels)  # assign shuffled labels to the data
         return data, labels
+

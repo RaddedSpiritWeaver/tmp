@@ -8,8 +8,8 @@ def sigmoid(x):
 
 
 def dy_dall(x, w, b):
-    wx_plus_b = w*x + b
-    return x*sigmoid(wx_plus_b)*(1 - sigmoid(wx_plus_b))
+    wx_plus_b = w * x + b
+    return x * sigmoid(wx_plus_b) * (1 - sigmoid(wx_plus_b))
 
 
 def calculate_y(W, X, b):
