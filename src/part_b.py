@@ -1,7 +1,7 @@
 import src.file_handler as file_handler
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
+
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
@@ -24,19 +24,6 @@ def calculate_cost(y, y_prim):
     return 1 / 2 * ((y - y_prim) ** 2)
 
 
-# define input symbols
-X, y_array = file_handler.read('./src/resources/data.csv')  # todo check the correct path
-
-# define variable symbols
-W = [np.random.rand(), np.random.rand()]
-b = np.random.rand()
-
-n_epoch = 50
-# lr = 0.01
-train = 150
-test = 50
-
-
 def calculate_y0(X, W, V, U, B):
     W_prime = np.array(W)
     U_prime = np.array(U)
@@ -48,11 +35,7 @@ def calculate_y0(X, W, V, U, B):
     return sigmoid(np.matmul(Z, U_prime) + B[2])
 
 
-W = [np.random.rand(), np.random.rand()]
-V = [np.random.rand(), np.random.rand()]
-U = [np.random.rand(), np.random.rand()]
-B = [np.random.rand(), np.random.rand(), np.random.rand()]
-def B_training(lr):
+def train_model(lr):
     for i in range(n_epoch):
         grad_w = np.zeros([len(W)])
         grad_v = np.zeros([len(V)])
@@ -61,17 +44,17 @@ def B_training(lr):
             for r2 in range(len(W)):
                 for r3 in range(len(V)):
                     for j in range(train):
-                        y0 = calculate_y0(X[j], W, V, U, B)
-                        cost = calculate_cost(y_array[j], y0)
+                        y0 = calculate_y0(data[j], W, V, U, B)
+                        cost = calculate_cost(labels[j], y0)
                         # calculate_y is also used to calculate WX+b0
-                        dcost_du = (y0 - y_array[j]) * dy_dall(calculate_y(W, X[j], B[0]), U[r1], B[0])
+                        dcost_du = (y0 - labels[j]) * dy_dall(calculate_y(W, data[j], B[0]), U[r1], B[0])
 
                         grad_u[r1] += dcost_du/3
-                        dcost_dw = (y0 - y_array[j]) * dy_dall(calculate_y(W, X[j], B[0]), U[r1], B[0]) * dy_dall(X[j][r2], W[r2],
-                                                                                                            B[0])
+                        dcost_dw = (y0 - labels[j]) * dy_dall(calculate_y(W, data[j], B[0]), U[r1], B[0]) * dy_dall(data[j][r2], W[r2],
+                                                                                                                    B[0])
                         grad_w[r2] += dcost_dw/3
-                        dcost_dv = (y0 - y_array[j]) * dy_dall(calculate_y(V, X[j], B[0]), U[r1], B[0]) * dy_dall(X[j][r3], V[r3],
-                                                                                                            B[1])
+                        dcost_dv = (y0 - labels[j]) * dy_dall(calculate_y(V, data[j], B[0]), U[r1], B[0]) * dy_dall(data[j][r3], V[r3],
+                                                                                                                    B[1])
                         grad_v[r3] += dcost_dv/3
         for r1 in range(len(U)):
             U[r1] = U[r1] - lr * grad_u[r1]
@@ -81,15 +64,34 @@ def B_training(lr):
             W[r1] = W[r1] - lr * grad_w[r1]
     lost = 0
     for i in range(train, train + test):
-        y = calculate_y0(X[i], W, V, U, B)
-        lost += 1 if np.abs(y - y_array[i]) > 0.5 else 0
+        y = calculate_y0(data[i], W, V, U, B)
+        lost += 1 if np.abs(y - labels[i]) > 0.5 else 0
     return lost
-epoch_array = [i*0.001 for i in range(50)]
-result = [B_training(item) for item in epoch_array]
-fig, ax = plt.subplots()
-ax.plot(epoch_array, result)
-ax.set(xlabel='lr', ylabel='lost', title='NN A result with different lr')
-ax.grid()
-fig.savefig('B_lr(0001-005)')
-plt.show()
-print(np.mean(result))
+
+
+if __name__ == '__main__':
+    # define input symbols
+    data, labels = file_handler.read('./resources/data.csv')  # todo check the correct path
+
+    # define variable symbols
+    W = [np.random.rand(), np.random.rand()]
+    b = np.random.rand()
+
+    n_epoch = 50
+    # lr = 0.01
+    train = 150
+    test = 50
+
+    W = [np.random.rand(), np.random.rand()]
+    V = [np.random.rand(), np.random.rand()]
+    U = [np.random.rand(), np.random.rand()]
+    B = [np.random.rand(), np.random.rand(), np.random.rand()]
+    epoch_array = [i*0.001 for i in range(50)]
+    result = [train_model(item) for item in epoch_array]
+    fig, ax = plt.subplots()
+    ax.plot(epoch_array, result)
+    ax.set(xlabel='lr', ylabel='lost', title='NN A result with different lr')
+    ax.grid()
+    fig.savefig('B_lr(0001-005)')
+    plt.show()
+    print(np.mean(result))
