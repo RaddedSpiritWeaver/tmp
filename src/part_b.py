@@ -2,6 +2,16 @@ import src.file_handler as file_handler
 import numpy as np
 import matplotlib.pyplot as plt
 
+# define variable symbols
+W = [np.random.rand(), np.random.rand()]
+V = [np.random.rand(), np.random.rand()]
+U = [np.random.rand(), np.random.rand()]
+B = [np.random.rand(), np.random.rand(), np.random.rand()]
+n_epoch = 50
+lr = 0.01
+train = 150
+test = 50
+
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
@@ -35,7 +45,7 @@ def calculate_y0(X, W, V, U, B):
     return sigmoid(np.matmul(Z, U_prime) + B[2])
 
 
-def train_model(lr):
+def train_and_test_model(lr):
     for i in range(n_epoch):
         grad_w = np.zeros([len(W)])
         grad_v = np.zeros([len(V)])
@@ -62,36 +72,38 @@ def train_model(lr):
             V[r1] = V[r1] - lr * grad_v[r1]
         for r1 in range(len(W)):
             W[r1] = W[r1] - lr * grad_w[r1]
-    lost = 0
+    print("model trained")
+    results = []
     for i in range(train, train + test):
         y = calculate_y0(data[i], W, V, U, B)
-        lost += 1 if np.abs(y - labels[i]) > 0.5 else 0
-    return lost
+        out_label = -1
+        if y > 0.5:
+            out_label = 1
+        else:
+            out_label = 0
+        results.append((data[i], out_label))
+    return results
 
 
 if __name__ == '__main__':
     # define input symbols
-    data, labels = file_handler.read('./resources/data.csv')  # todo check the correct path
+    data, labels = file_handler.read('./resources/data.csv')
+    network_calculated = train_and_test_model(n_epoch)
 
-    # define variable symbols
-    W = [np.random.rand(), np.random.rand()]
-    b = np.random.rand()
+    x_list_1 = []
+    y_list_1 = []
 
-    n_epoch = 50
-    # lr = 0.01
-    train = 150
-    test = 50
+    x_list_0 = []
+    y_list_0 = []
 
-    W = [np.random.rand(), np.random.rand()]
-    V = [np.random.rand(), np.random.rand()]
-    U = [np.random.rand(), np.random.rand()]
-    B = [np.random.rand(), np.random.rand(), np.random.rand()]
-    epoch_array = [i*0.001 for i in range(50)]
-    result = [train_model(item) for item in epoch_array]
-    fig, ax = plt.subplots()
-    ax.plot(epoch_array, result)
-    ax.set(xlabel='lr', ylabel='lost', title='NN A result with different lr')
-    ax.grid()
-    fig.savefig('B_lr(0001-005)')
+    for data in network_calculated:
+        if data[1] == 0:
+            x_list_0.append(data[0][0])
+            y_list_0.append(data[0][1])
+        if data[1] == 1:
+            x_list_1.append(data[0][0])
+            y_list_1.append(data[0][1])
+    plt.scatter(x_list_0, y_list_0, c="red", label="type0")
+    plt.scatter(x_list_1, y_list_1, c="blue", label="type1")
+
     plt.show()
-    print(np.mean(result))
